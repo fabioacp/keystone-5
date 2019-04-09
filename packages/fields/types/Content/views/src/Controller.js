@@ -4,6 +4,7 @@
 // should import from '@keystone-alpha/fields/types/Text/views/Controller'
 import memoizeOne from 'memoize-one';
 import TextController from '../../../Text/views/Controller/Controller';
+import { serialiseSlateDocument, buildMutationFromSerialisation } from './serialiser';
 import * as paragraph from './editor/blocks/paragraph';
 
 const DEFAULT_BLOCKS = [paragraph];
@@ -65,7 +66,13 @@ export default class ContentController extends TextController {
       // Forcibly return null if empty string
       return { document: null };
     }
-    return { document: data[path].document };
+
+    const serialisedDocument = serialiseSlateDocument(
+      data[path].document,
+      this.getBlocks().filter(({ isComplexData }) => isComplexData)
+    );
+
+    return buildMutationFromSerialisation(serialisedDocument);
   };
 
   getQueryFragment = () => {
